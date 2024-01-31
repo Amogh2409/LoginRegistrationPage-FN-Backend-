@@ -21,35 +21,35 @@ const UserSchema = new Schema({
 }, { timestamps: true });  // timestamps: true  will automatically add the createdAt and updatedAt fields for us.
 
 
-UserSchema.pre('save', function (next) {  // this will run before the save method is called
+UserSchema.pre('save', async function () {  // this will run before the save method is called
     var user = this; // this refers to the UserSchema object
-    if(!user.isModified('password')){
+    if (!user.isModified('password')) {
         return
     }
-    try{
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(user.password, salt);
+    try {
+        const salt = await bcrypt.genSaltSync(10);
+        const hash = await bcrypt.hashSync(user.password, salt);
 
         user.password = hash;
     }
-    catch(err){
+    catch (err) {
         console.log(err)
     }
 }); // pre save hook
 
-UserSchema.methods.comparePassword = function (password) { // comparePassword is a custom method
-    try{
+UserSchema.methods.comparePassword = async function (password) { // comparePassword is a custom method
+    try {
         console.log("password", this.password)
 
-        const IsValid = bcrypt.compareSync(password, this.password);  // this will match the password with the hash password
+        const IsValid = await bcrypt.compareSync(password, this.password);  // this will match the password with the hash password
         return IsValid;
     }
-    catch(err){
+    catch (err) {
         console.log(err)
     }
 }; // comparePassword method
 
-const UserModel = mongoose.model('User', UserSchema); // User is the name of the collection
+const UserModel = db.model('User', UserSchema); // User is the name of the collection
 module.exports = UserModel;
 
 
